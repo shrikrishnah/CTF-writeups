@@ -81,7 +81,6 @@ After locating the file, it was read to obtain the user flag.
 
 ### User Flag
 
-![User Flag](screenshots/user-flag.png)
 
 ---
 
