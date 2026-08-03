@@ -45,10 +45,12 @@ More importantly, the application relied on **local authentication** and did not
 This indicated that it might be possible to obtain temporary AWS credentials without successfully logging in.
 
 ---
+<img width="975" height="199" alt="image" src="https://github.com/user-attachments/assets/770010e0-7f11-437c-b014-81e3ae06e5ae" />
 
 ## Obtaining AWS Credentials
 
-<img width="975" height="277" alt="image" src="https://github.com/user-attachments/assets/3e09eeca-c184-47d1-a1df-584570db0617" />
+<img width="975" height="301" alt="image" src="https://github.com/user-attachments/assets/35373051-a01c-4219-a89b-a0f1d4fc2f80" />
+
 
 Using the Cognito Identity Pool information discovered in `app.js`, I requested an identity ID.
 
