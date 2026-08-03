@@ -100,10 +100,6 @@ export AWS_SECRET_ACCESS_KEY=<SECRET_KEY>
 export AWS_SESSION_TOKEN=<SESSION_TOKEN>
 ```
 
-### AWS Credentials
-
-<img width="975" height="277" alt="image" src="https://github.com/user-attachments/assets/12d8872f-e4b8-4662-9233-647946e16e44" />
-
 
 ---
 
