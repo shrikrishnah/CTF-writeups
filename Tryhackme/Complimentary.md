@@ -136,10 +136,10 @@ After identifying the table, I scanned it.
 
 ```bash
 aws dynamodb scan --table-name <table-name>
-<img width="975" height="361" alt="image" src="https://github.com/user-attachments/assets/72634185-70d0-4265-ba2b-13f34953a059" />
+
 
 ```
-
+<img width="975" height="361" alt="image" src="https://github.com/user-attachments/assets/72634185-70d0-4265-ba2b-13f34953a059" />
 Example Output
 
 ```text
