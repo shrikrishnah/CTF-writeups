@@ -31,7 +31,7 @@ dig +nocmd flaws.cloud
 
 The response returns 8 A records. Most resolve to CloudFront — one resolves to an S3 endpoint.
 
-![DNS enumeration output](./images/page-02.jpg)
+![DNS enumeration output](./Images/page-02.jpg)
 
 ### Step 2 — Identify the S3 Endpoint
 
@@ -70,7 +70,7 @@ aws s3 cp s3://flaws.cloud/secret-dd02c7c.html . --no-sign-request --region us-w
 cat ./secret-dd02c7c.html
 ```
 
-![Secret file contents with Level 2 link](./images/page-04.jpg)
+![Secret file contents with Level 2 link](./Images/page-04.jpg)
 
 ### Lesson Learned
 
@@ -87,7 +87,7 @@ S3 buckets are private by default. The flaw here was explicitly granting **"Ever
 ### Attack Summary
 > The bucket grants **List** permission to **"Any Authenticated AWS User"** — meaning *any* AWS account, not just the owner's. A personal test AWS account is enough to enumerate and download files.
 
-![Level 2 lesson page](./images/page-05.jpg)
+![Level 2 lesson page](./Images/page-05.jpg)
 
 ### Step 1 — Configure a Personal AWS Profile
 
@@ -119,7 +119,7 @@ aws s3 --profile Shri cp s3://level2-c8b217a33fcf1f839f6f1f73a00a9ae7.flaws.clou
 cat ./secret-e4443fc.html
 ```
 
-![Secret file contents with Level 3 link](./images/page-06.jpg)
+![Secret file contents with Level 3 link](./Images/page-06.jpg)
 
 ### Lesson Learned
 
@@ -136,7 +136,7 @@ cat ./secret-e4443fc.html
 ### Attack Summary
 > The S3 bucket was synced from a git repository and the `.git/` directory was accidentally uploaded along with the site. By checking the git log, we find a previous commit that included AWS credentials before they were deleted.
 
-![Level 3 lesson page](./images/page-07.jpg)
+![Level 3 lesson page](./Images/page-07.jpg)
 
 ### Step 1 — Recursive Bucket Listing Reveals `.git/`
 
@@ -146,7 +146,7 @@ aws s3 --profile Shri ls s3://level3-9afd3927f195e10225021a578e6f78df.flaws.clou
 
 Among the results: `.git/HEAD`, `.git/config`, `.git/objects/…` — a full git repo is exposed.
 
-![Recursive listing showing .git directory](./images/page-08.jpg)
+![Recursive listing showing .git directory](./Images/page-08.jpg)
 
 ### Step 2 — Sync the Entire Bucket Locally
 
@@ -184,7 +184,7 @@ diff --git a/access_keys.txt b/access_keys.txt
 -secret_access_key [REDACTED]
 ```
 
-![Git log and leaked credentials](./images/page-09.jpg)
+![Git log and leaked credentials](./Images/page-09.jpg)
 
 ### Step 4 — Configure Profile with Leaked Credentials
 
@@ -212,7 +212,7 @@ aws --profile flaws-lvl3 s3 ls
 
 This lists every bucket in the account, including all future level buckets — a major over-privilege for a `backup` user.
 
-![All buckets listed with the leaked key](./images/page-10.jpg)
+![All buckets listed with the leaked key](./Images/page-10.jpg)
 
 ### Lesson Learned
 
@@ -247,7 +247,7 @@ aws ec2 describe-snapshots \
 }
 ```
 
-![Describe-snapshots output](./images/page-11.jpg)
+![Describe-snapshots output](./Images/page-11.jpg)
 
 ### Step 2 — Create a Volume from the Snapshot (in Your Own Account)
 
@@ -289,7 +289,7 @@ htpasswd -b /etc/nginx/.htpasswd flaws [REDACTED]
 
 **Credentials:** `flaws` / `[REDACTED]`
 
-![Mounted snapshot and credentials found](./images/page-13.jpg)
+![Mounted snapshot and credentials found](./Images/page-13.jpg)
 
 ### Step 5 — Enter Credentials on the Level 4 Site → Solved ✓
 
@@ -329,7 +329,7 @@ This returns the temporary credentials for the `flaws` IAM role:
 }
 ```
 
-![IMDS response with temporary credentials](./images/page-14.jpg)
+![IMDS response with temporary credentials](./Images/page-14.jpg)
 
 ### Step 2 — Configure the Stolen IAM Credentials
 
@@ -361,7 +361,7 @@ PRE ddcc78ff/
 
 Accessing `ddcc78ff/` as a subdirectory gives us the Level 6 URL.
 
-![Level 6 subdirectory discovered](./images/page-15.jpg)
+![Level 6 subdirectory discovered](./Images/page-15.jpg)
 
 ### Lesson Learned
 
@@ -408,7 +408,7 @@ aws iam list-attached-user-policies \
   --profile flaws-lvl6
 ```
 
-![IAM enumeration — users, roles, and policies](./images/page-17.jpg)
+![IAM enumeration — users, roles, and policies](./Images/page-17.jpg)
 
 **Attached policies for Level6:**
 - `MySecurityAudit` — broad read-only access
@@ -437,7 +437,7 @@ aws --profile flaws-lvl6 iam get-policy-version \
 }
 ```
 
-![Policy document showing apigateway:GET permission](./images/page-18.jpg)
+![Policy document showing apigateway:GET permission](./Images/page-18.jpg)
 
 We can list and read API Gateways in `us-west-2`.
 
@@ -496,7 +496,7 @@ aws apigateway get-stages \
 { "stageName": "Prod", "deploymentId": "8gppiv" }
 ```
 
-![API Gateway resources and stage](./images/page-19.jpg)
+![API Gateway resources and stage](./Images/page-19.jpg)
 
 ### Step 6 — Invoke the Endpoint → Final Flag
 
@@ -512,7 +512,7 @@ Visiting this URL returns the final endpoint:
 http://theend-797237e8ada164bf9f12cebf93b282cf.flaws.cloud/d730aa2b
 ```
 
-![The End page](./images/page-20.jpg)
+![The End page](./Images/page-20.jpg)
 
 ### Lesson Learned
 
