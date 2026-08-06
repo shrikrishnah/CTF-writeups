@@ -246,4 +246,4 @@ Flag: THM{n0t_ur_k3ys_n0t_ur_c01ns!}
 
 ---
 
-*Writeup by Saanvi · TryHackMe Azure CryptoCabana challenge*
+*Writeup by Shrikrishna · TryHackMe Azure CryptoCabana challenge*
