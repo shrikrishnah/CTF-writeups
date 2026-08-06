@@ -120,4 +120,4 @@ This challenge demonstrated **direct prompt injection via persona spoofing** —
 
 ---
 
-*Writeup by Saanvi · TryHackMe — The Concierge Knows Too Much*
+*Writeup by Shrikrishna · TryHackMe — The Concierge Knows Too Much*
