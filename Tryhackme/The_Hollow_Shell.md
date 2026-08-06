@@ -242,4 +242,4 @@ cat flag.txt
 
 ---
 
-*Writeup by Saanvi · TryHackMe — The Hollow Shell*
+*Writeup by Shrikrishna · TryHackMe — The Hollow Shell*
