@@ -546,4 +546,4 @@ Read-only IAM permissions like `SecurityAudit` are not harmless. The ability to 
 
 ---
 
-*Writeup by Saanvi · flaws.cloud by [Scott Piper](https://summitroute.com/)*
+*Writeup by Shrikrishna · flaws.cloud by [Scott Piper](https://summitroute.com/)*
