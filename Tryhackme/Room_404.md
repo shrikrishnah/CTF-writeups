@@ -172,4 +172,4 @@ git log -p
 
 ---
 
-*Writeup by Saanvi · TryHackMe — Room 404*
+*Writeup by Shrikrishna · TryHackMe — Room 404*
